@@ -1,0 +1,14 @@
+[
+  {
+    "id": "fruits",
+    "label": "Фрукты"
+  },
+  {
+    "id": "russian_cities",
+    "label": "Города России"
+  },
+  {
+    "id": "animals",
+    "label": "Животные"
+  }
+]

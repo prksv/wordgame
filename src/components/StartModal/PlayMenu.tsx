@@ -8,7 +8,7 @@ import { TCategory } from "../../hooks/useGameword.ts";
 import { loadWords, startGame } from "../../features/game/gameSlice.ts";
 function PlayMenu() {
   const dispatch = useAppDispatch();
-  const { isStarted } = useAppSelector((state) => state.game);
+  const { status } = useAppSelector((state) => state.game);
   const [category, setCategory] = useState<TCategory | null>(null);
 
   const resume = () => {
@@ -40,7 +40,7 @@ function PlayMenu() {
       </Typography>
       <Stack spacing="15px">
         <ButtonGroup>
-          {!isStarted &&
+          {status == "waiting" &&
             categories.map((gameCategory, key) => {
               return (
                 <Button
@@ -56,11 +56,11 @@ function PlayMenu() {
             })}
         </ButtonGroup>
         <Button
-          disabled={category === undefined}
-          onClick={isStarted ? resume : play}
+          disabled={category === null && status == "waiting"}
+          onClick={status == "started" ? resume : play}
           variant="contained"
         >
-          {isStarted ? "Продолжить" : "Играть"}
+          {status == "started" ? "Продолжить" : "Играть"}
         </Button>
       </Stack>
       <HowToPlayAccordion />

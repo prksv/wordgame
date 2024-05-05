@@ -2,31 +2,34 @@ import { Collapse, Stack, Typography } from "@mui/material";
 import useWordInput from "../../hooks/useWordInput.ts";
 import LetterInput from "./LetterInput.tsx";
 import { TransitionGroup } from "react-transition-group";
-import { useAppSelector } from "../../hooks.ts";
 import useGameword from "../../hooks/useGameword.ts";
+import { TInputStatus } from "../../features/game/gameSlice.ts";
 
 export interface WordInputInterface {
   minSlots?: number;
   onSubmit: ReturnType<typeof useGameword>["onSubmit"];
   value?: string;
   inputId: number;
+  isUserMove: boolean;
+  status?: TInputStatus;
+  disabled: boolean;
 }
 
 function WordInput({
+  disabled,
   minSlots = 3,
   onSubmit,
   value,
   inputId,
+  isUserMove,
+  status,
 }: WordInputInterface) {
   const { word, handleKeyDown, handleChange, focusOn } = useWordInput(
     inputId,
     minSlots,
     onSubmit,
     value,
-  );
-
-  const { status, isUserMove } = useAppSelector(
-    (state) => state.game.inputs[inputId],
+    status,
   );
 
   function You() {
@@ -52,6 +55,7 @@ function WordInput({
               timeout={{ exit: 50, enter: 200 }}
             >
               <LetterInput
+                disabled={disabled}
                 status={status}
                 key={index}
                 index={index}

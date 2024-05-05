@@ -1,4 +1,9 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createAsyncThunk,
+  createSelector,
+  createSlice,
+  PayloadAction,
+} from "@reduxjs/toolkit";
 import axios from "axios";
 import _ from "lodash";
 import { RootState } from "../../store.ts";
@@ -23,7 +28,7 @@ export type TSubmitError = {
 
 const SKIP_LETTERS = ["ь", "ъ", "й", "ы"];
 
-const filterWord = (word: string) => {
+const formatWord = (word: string) => {
   const regexp = new RegExp(SKIP_LETTERS.join("|"), "g");
 
   return word.replace(regexp, "");
@@ -31,17 +36,23 @@ const filterWord = (word: string) => {
 
 export interface GameState {
   category?: Category;
-  isStarted: boolean;
-  isUserMove: boolean;
+  status: "started" | "waiting" | "lose" | "win";
+  winReason: string;
+  loseReason: string;
   inputs: TInput[];
   words: string[];
+  usedWords: string[];
+  isAvailableWordsRemains: boolean;
 }
 
 const initialState: GameState = {
   inputs: [],
-  isStarted: false,
-  isUserMove: false,
+  status: "waiting",
   words: [],
+  usedWords: [],
+  winReason: "У соперника закончились слова",
+  loseReason: "",
+  isAvailableWordsRemains: true,
 };
 
 export const loadWords = createAsyncThunk(
@@ -51,7 +62,7 @@ export const loadWords = createAsyncThunk(
       responseEncoding: "utf-8",
     });
 
-    return data.split("\r\n");
+    return data.split("\n");
   },
 );
 
@@ -66,7 +77,7 @@ export const submitWordTest = createAsyncThunk(
     if (inputId > 0) {
       const { value } = game.inputs[inputId - 1];
 
-      const lastLetter = _.last(filterWord(value));
+      const lastLetter = _.last(formatWord(value));
 
       if (lastLetter !== word[0]) {
         return rejectWithValue({
@@ -83,12 +94,14 @@ export const submitWordTest = createAsyncThunk(
       });
     }
 
-    dispatch(
-      setInputValue({
-        inputIndex: inputId,
-        value: word,
-      }),
-    );
+    if (game.usedWords.includes(word)) {
+      return rejectWithValue({
+        inputId,
+        message: "Слово уже использовалось!",
+      });
+    }
+
+    dispatch(claimWord(word));
 
     dispatch(setInputSuccess(inputId));
     dispatch(makeBotMove(word));
@@ -101,21 +114,47 @@ export const makeBotMove = createAsyncThunk(
     const { game } = getState() as RootState;
     const words = [...game.words];
 
-    const filteredWord = filterWord(previousWord);
+    const availableWords = selectAvailableWords(getState(), previousWord);
 
-    const takenWord = _.sample(
-      words.filter((word) => word[0] == filteredWord[filteredWord.length - 1]),
-    )!;
+    if (availableWords.length <= 0) {
+      dispatch(setGameWin());
+      return;
+    }
+
+    const takenWord = _.sample(availableWords)!;
 
     words.splice(words.indexOf(takenWord), 1);
 
     dispatch(addInput({ isUserMove: false, value: takenWord }));
+    dispatch(claimWord(takenWord));
+
+    if (selectAvailableWords(getState(), takenWord).length <= 0) {
+      dispatch(setNoAvailableWords());
+    }
 
     dispatch(
       addInput({
         isUserMove: true,
-        value: _.last(filterWord(takenWord))!,
+        value: _.last(formatWord(takenWord))!,
       }),
+    );
+  },
+);
+
+export const selectAvailableWords = createSelector(
+  [
+    (state: RootState) => state.game,
+    (_, searchWord: string | undefined) => searchWord,
+  ],
+  (game, searchWord) => {
+    if (!searchWord) {
+      return game.words;
+    }
+
+    return game.words.filter(
+      (word) =>
+        !game.usedWords.includes(word) &&
+        formatWord(word)[0] == _.last(formatWord(searchWord)),
     );
   },
 );
@@ -132,17 +171,34 @@ export const gameSlice = createSlice({
       state.inputs[payload].status = "error";
     },
 
+    setNoAvailableWords: (state) => {
+      state.isAvailableWordsRemains = false;
+    },
+
     setInputSuccess: (state, { payload }: PayloadAction<number>) => {
       state.inputs[payload].status = "success";
     },
 
-    setGameStarted: (state, { payload }: PayloadAction<boolean>) => {
-      state.isStarted = payload;
+    setGameWin: (state) => {
+      state.status = "win";
+      state.inputs = [];
+    },
+
+    setGameLose: (state, { payload }: PayloadAction<string>) => {
+      state.status = "lose";
+      state.inputs = [];
+      state.loseReason = payload;
+    },
+
+    setGameStatus: (state, { payload }: PayloadAction<GameState["status"]>) => {
+      state.status = payload;
     },
 
     startGame: (state, { payload }: PayloadAction<Category>) => {
-      state.isStarted = true;
+      state.status = "started";
       state.category = payload;
+      state.inputs = [];
+      state.isAvailableWordsRemains = true;
       state.inputs.push({ isUserMove: true, value: "" });
     },
 
@@ -153,10 +209,8 @@ export const gameSlice = createSlice({
       state.inputs[payload.inputIndex].value = payload.value.toLowerCase();
     },
 
-    claimWord: (state, { payload }: PayloadAction<number>) => {
-      const newWords = [...state.words];
-      newWords.splice(payload, 1);
-      state.words = newWords;
+    claimWord: (state, { payload }: PayloadAction<string>) => {
+      state.usedWords.push(payload);
     },
 
     addInput: (state, { payload }: PayloadAction<TInput>) => {
@@ -170,26 +224,23 @@ export const gameSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(loadWords.fulfilled, (state, { payload }) => {
       state.words = payload;
+      state.usedWords = [];
     });
-
-    builder.addCase(
-      submitWordTest.rejected,
-      (state, { payload }: PayloadAction<TSubmitError>) => {
-        state.inputs[payload.inputId].status = "error";
-      },
-    );
   },
 });
 
 export const {
   setCategory,
-  setGameStarted,
+  setGameStatus,
   startGame,
   setInputValue,
   addInput,
   setInputError,
   setInputSuccess,
   claimWord,
+  setGameLose,
+  setGameWin,
+  setNoAvailableWords,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

@@ -1,23 +1,34 @@
 import React, { createRef, useCallback, useEffect, useState } from "react";
+import { useAppDispatch } from "../hooks.ts";
+import { setInputValue, TInputStatus } from "../features/game/gameSlice.ts";
 
 function useWordInput(
   inputId: number,
   minSlots: number,
   onSubmit: any,
   value?: string,
+  status?: TInputStatus,
 ) {
-  const [word, setWord] = useState(
-    Array((value?.length ?? 0) > minSlots ? value?.length : minSlots)
+  const dispatch = useAppDispatch();
+
+  const [focusOn, setFocusOn] = useState(0);
+
+  const fillWord = useCallback(() => {
+    return Array((value?.length ?? 0) > minSlots ? value?.length : minSlots)
       .fill(null)
       .map((_, key) => {
         return {
           value: value?.[key] ?? "",
           ref: createRef(),
         };
-      }),
-  );
+      });
+  }, [value]);
 
-  const [focusOn, setFocusOn] = useState(0);
+  const [word, setWord] = useState(fillWord());
+
+  useEffect(() => {
+    setWord(fillWord());
+  }, [value]);
 
   const getWord = useCallback(() => {
     return word
@@ -25,6 +36,10 @@ function useWordInput(
       .join("")
       .trim();
   }, [word]);
+
+  useEffect(() => {
+    dispatch(setInputValue({ inputIndex: inputId, value: getWord() }));
+  }, [getWord]);
 
   useEffect(() => {
     if (!value) {

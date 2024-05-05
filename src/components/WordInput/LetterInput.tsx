@@ -12,6 +12,7 @@ interface LetterInputProps {
   focusOn: number;
   letterRef: RefObject<unknown>;
   status?: TInputStatus;
+  disabled: boolean;
 }
 
 function LetterInput({
@@ -23,6 +24,7 @@ function LetterInput({
   value,
   letterRef,
   status,
+  disabled,
 }: LetterInputProps) {
   const getStatusColor = () => {
     switch (status) {
@@ -38,7 +40,7 @@ function LetterInput({
   return (
     <Box key={index} borderRadius="5px" bgcolor={getStatusColor()}>
       <InputBase
-        disabled={!isUserMove}
+        disabled={!isUserMove || disabled}
         color="info"
         size="medium"
         value={value}

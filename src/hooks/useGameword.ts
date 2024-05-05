@@ -1,5 +1,10 @@
 import { useAppDispatch } from "../hooks.ts";
-import { submitWordTest } from "../features/game/gameSlice.ts";
+import {
+  setInputError,
+  setInputSuccess,
+  submitWordTest,
+} from "../features/game/gameSlice.ts";
+import { createAlert } from "../features/alerts/alertsSlice.ts";
 
 export type TCategory = {
   label: string;
@@ -10,7 +15,15 @@ function useGameword() {
   const dispatch = useAppDispatch();
 
   const onSubmit = (inputId: number, word: string) => {
-    dispatch(submitWordTest({ inputId, word }));
+    dispatch(submitWordTest({ inputId, word }))
+      .unwrap()
+      .then(() => {
+        dispatch(setInputSuccess(inputId));
+      })
+      .catch((err) => {
+        dispatch(setInputError(inputId));
+        dispatch(createAlert({ message: err.message, type: "error" }));
+      });
   };
 
   return { onSubmit };

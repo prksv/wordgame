@@ -1,7 +1,6 @@
 import { Box, Container, Fade, Modal, Stack, Typography } from "@mui/material";
 import { useAppSelector } from "../../hooks.ts";
 import kguLogo from "../../assets/logo.svg";
-import prosekovLogo from "../../assets/prskv.png";
 import { useEffect, useState } from "react";
 import PlayMenu from "./PlayMenu.tsx";
 
@@ -49,7 +48,7 @@ function StartModal() {
                 <img
                   src={kguLogo}
                   style={{ width: "200px", marginBottom: "20px" }}
-                  alt=""
+                  alt="КГУ"
                 />
                 <Typography textAlign="right" color="black">
                   <span style={{ fontWeight: "bold" }}>Работа выполнил:</span>

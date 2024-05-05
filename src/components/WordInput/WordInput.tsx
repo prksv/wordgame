@@ -29,7 +29,6 @@ function WordInput({
     minSlots,
     onSubmit,
     value,
-    status,
   );
 
   function You() {

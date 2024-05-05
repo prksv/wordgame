@@ -2,7 +2,7 @@ import { useAppDispatch } from "../hooks.ts";
 import {
   setInputError,
   setInputSuccess,
-  submitWordTest,
+  submitWord,
 } from "../features/game/gameSlice.ts";
 import { createAlert } from "../features/alerts/alertsSlice.ts";
 
@@ -15,7 +15,7 @@ function useGameword() {
   const dispatch = useAppDispatch();
 
   const onSubmit = (inputId: number, word: string) => {
-    dispatch(submitWordTest({ inputId, word }))
+    dispatch(submitWord({ inputId, word }))
       .unwrap()
       .then(() => {
         dispatch(setInputSuccess(inputId));

@@ -1,13 +1,12 @@
 import React, { createRef, useCallback, useEffect, useState } from "react";
 import { useAppDispatch } from "../hooks.ts";
-import { setInputValue, TInputStatus } from "../features/game/gameSlice.ts";
+import { setInputValue } from "../features/game/gameSlice.ts";
 
 function useWordInput(
   inputId: number,
   minSlots: number,
   onSubmit: any,
   value?: string,
-  status?: TInputStatus,
 ) {
   const dispatch = useAppDispatch();
 
@@ -31,10 +30,7 @@ function useWordInput(
   }, [value]);
 
   const getWord = useCallback(() => {
-    return word
-      .map((letter) => letter.value)
-      .join("")
-      .trim();
+    return word.map((letter) => letter.value).join("");
   }, [word]);
 
   useEffect(() => {
@@ -60,6 +56,7 @@ function useWordInput(
   }, [word, focusOn]);
 
   function handleChange(index: number, value: string) {
+    console.log(value);
     if (value == "") {
       return;
     }

@@ -1,7 +1,7 @@
 import { Button, Stack, Typography } from "@mui/material";
 import {
   selectAvailableWords,
-  setGameLose,
+  setGameStatus,
 } from "../../features/game/gameSlice.ts";
 import { useMemo } from "react";
 import _ from "lodash";
@@ -20,7 +20,7 @@ function SurrenderButton() {
     selectAvailableWords(state, lastEnemyInput?.value),
   );
   const surrender = () => {
-    dispatch(setGameLose("Вы сдались"));
+    dispatch(setGameStatus("lose"));
   };
 
   return (

@@ -7,6 +7,7 @@ import {
 import axios from "axios";
 import _ from "lodash";
 import { RootState } from "../../store.ts";
+import { TCategory } from "../../hooks/useGameword.ts";
 
 export type Category = {
   label: string;
@@ -34,15 +35,16 @@ const formatWord = (word: string) => {
   return word.replace(regexp, "");
 };
 
+export type TGameStatus = "started" | "waiting" | "lose" | "win";
+
 export interface GameState {
   category?: Category;
-  status: "started" | "waiting" | "lose" | "win";
+  status: TGameStatus;
   winReason: string;
   loseReason: string;
   inputs: TInput[];
   words: string[];
   usedWords: string[];
-  isAvailableWordsRemains: boolean;
 }
 
 const initialState: GameState = {
@@ -51,8 +53,7 @@ const initialState: GameState = {
   words: [],
   usedWords: [],
   winReason: "У соперника закончились слова",
-  loseReason: "",
-  isAvailableWordsRemains: true,
+  loseReason: "Вы сдались",
 };
 
 export const loadWords = createAsyncThunk(
@@ -66,7 +67,38 @@ export const loadWords = createAsyncThunk(
   },
 );
 
-export const submitWordTest = createAsyncThunk(
+export const startGame = createAsyncThunk(
+  "game/start",
+  async (
+    {
+      category,
+      isUserFirstMove,
+    }: {
+      category: TCategory;
+      isUserFirstMove: boolean;
+    },
+    { dispatch },
+  ) => {
+    dispatch(setCategory(category));
+    dispatch(setInputs([]));
+    await dispatch(loadWords(category.id));
+
+    if (isUserFirstMove) {
+      dispatch(
+        addInput({
+          isUserMove: true,
+          value: "",
+        }),
+      );
+    } else {
+      dispatch(makeBotMove(null));
+    }
+
+    dispatch(setGameStatus("started"));
+  },
+);
+
+export const submitWord = createAsyncThunk(
   "game/submitWord",
   async (
     { inputId, word }: { inputId: number; word: string },
@@ -110,14 +142,16 @@ export const submitWordTest = createAsyncThunk(
 
 export const makeBotMove = createAsyncThunk(
   "game/botMove",
-  async (previousWord: string, { getState, dispatch }) => {
+  async (previousWord: string | null, { getState, dispatch }) => {
     const { game } = getState() as RootState;
     const words = [...game.words];
 
-    const availableWords = selectAvailableWords(getState(), previousWord);
-
+    const availableWords = previousWord
+      ? selectAvailableWords(getState(), previousWord)
+      : selectNotTakenWords(getState() as RootState);
+    console.log(availableWords);
     if (availableWords.length <= 0) {
-      dispatch(setGameWin());
+      dispatch(setGameStatus("win"));
       return;
     }
 
@@ -128,10 +162,6 @@ export const makeBotMove = createAsyncThunk(
     dispatch(addInput({ isUserMove: false, value: takenWord }));
     dispatch(claimWord(takenWord));
 
-    if (selectAvailableWords(getState(), takenWord).length <= 0) {
-      dispatch(setNoAvailableWords());
-    }
-
     dispatch(
       addInput({
         isUserMove: true,
@@ -140,6 +170,12 @@ export const makeBotMove = createAsyncThunk(
     );
   },
 );
+
+const selectNotTakenWords = (state: RootState) => {
+  return state.game.words.filter(
+    (word) => !state.game.usedWords.includes(word),
+  );
+};
 
 export const selectAvailableWords = createSelector(
   [
@@ -171,26 +207,11 @@ export const gameSlice = createSlice({
       state.inputs[payload].status = "error";
     },
 
-    setNoAvailableWords: (state) => {
-      state.isAvailableWordsRemains = false;
-    },
-
     setInputSuccess: (state, { payload }: PayloadAction<number>) => {
       state.inputs[payload].status = "success";
     },
 
-    setGameWin: (state) => {
-      state.status = "win";
-      state.inputs = [];
-    },
-
-    setGameLose: (state, { payload }: PayloadAction<string>) => {
-      state.status = "lose";
-      state.inputs = [];
-      state.loseReason = payload;
-    },
-
-    setGameStatus: (state, { payload }: PayloadAction<GameState["status"]>) => {
+    setGameStatus: (state, { payload }: PayloadAction<TGameStatus>) => {
       state.status = payload;
     },
 
@@ -198,8 +219,11 @@ export const gameSlice = createSlice({
       state.status = "started";
       state.category = payload;
       state.inputs = [];
-      state.isAvailableWordsRemains = true;
       state.inputs.push({ isUserMove: true, value: "" });
+    },
+
+    setInputs: (state, { payload }: PayloadAction<TInput[]>) => {
+      state.inputs = payload;
     },
 
     setInputValue: (
@@ -232,15 +256,12 @@ export const gameSlice = createSlice({
 export const {
   setCategory,
   setGameStatus,
-  startGame,
   setInputValue,
   addInput,
   setInputError,
   setInputSuccess,
   claimWord,
-  setGameLose,
-  setGameWin,
-  setNoAvailableWords,
+  setInputs,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

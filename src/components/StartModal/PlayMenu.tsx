@@ -12,12 +12,13 @@ import { useAppDispatch, useAppSelector } from "../../hooks.ts";
 import { closeMenu, closeRules } from "../../features/menu/menuSlice.ts";
 import { useState } from "react";
 import { TCategory } from "../../hooks/useGameword.ts";
-import { loadWords, startGame } from "../../features/game/gameSlice.ts";
+import { startGame } from "../../features/game/gameSlice.ts";
 
 function PlayMenu() {
   const dispatch = useAppDispatch();
   const { status } = useAppSelector((state) => state.game);
   const [category, setCategory] = useState<TCategory | null>(null);
+  const [isUserFirstMove, setUserFirstMove] = useState<boolean>(true);
 
   const resume = () => {
     dispatch(closeMenu());
@@ -30,8 +31,7 @@ function PlayMenu() {
     }
 
     resume();
-    dispatch(startGame(category));
-    dispatch(loadWords(category.id));
+    dispatch(startGame({ category, isUserFirstMove }));
   };
 
   return (
@@ -71,7 +71,12 @@ function PlayMenu() {
         </Button>
         <FormControlLabel
           sx={{ alignSelf: "center" }}
-          control={<Checkbox />}
+          control={
+            <Checkbox
+              checked={isUserFirstMove}
+              onChange={() => setUserFirstMove(!isUserFirstMove)}
+            />
+          }
           label="Я хожу первым"
         />
       </Stack>

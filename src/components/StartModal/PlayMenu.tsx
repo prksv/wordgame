@@ -1,4 +1,11 @@
-import { Button, ButtonGroup, Stack, Typography } from "@mui/material";
+import {
+  Button,
+  ButtonGroup,
+  Checkbox,
+  FormControlLabel,
+  Stack,
+  Typography,
+} from "@mui/material";
 import categories from "../../categories.json";
 import HowToPlayAccordion from "./HowToPlayAccordion.tsx";
 import { useAppDispatch, useAppSelector } from "../../hooks.ts";
@@ -6,6 +13,7 @@ import { closeMenu, closeRules } from "../../features/menu/menuSlice.ts";
 import { useState } from "react";
 import { TCategory } from "../../hooks/useGameword.ts";
 import { loadWords, startGame } from "../../features/game/gameSlice.ts";
+
 function PlayMenu() {
   const dispatch = useAppDispatch();
   const { status } = useAppSelector((state) => state.game);
@@ -33,13 +41,12 @@ function PlayMenu() {
       maxWidth="500px"
       flexGrow={1}
       mb="40px"
-      spacing="10px"
     >
-      <Typography variant="h3" fontWeight="bold">
+      <Typography variant="h3" sx={{ mb: "20px" }} fontWeight="bold">
         Игра в слова
       </Typography>
-      <Stack spacing="15px">
-        <ButtonGroup>
+      <Stack sx={{ mb: "10px" }}>
+        <ButtonGroup sx={{ mb: "15px" }}>
           {status == "waiting" &&
             categories.map((gameCategory, key) => {
               return (
@@ -62,6 +69,11 @@ function PlayMenu() {
         >
           {status == "started" ? "Продолжить" : "Играть"}
         </Button>
+        <FormControlLabel
+          sx={{ alignSelf: "center" }}
+          control={<Checkbox />}
+          label="Я хожу первым"
+        />
       </Stack>
       <HowToPlayAccordion />
     </Stack>

@@ -1,7 +1,7 @@
 import { Fade, Modal, Stack, Typography } from "@mui/material";
 import { useWindowSize } from "react-use";
 import Confetti from "react-confetti";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import PlayAgainButton from "../PlayAgainButton/PlayAgainButton.tsx";
 import { useAppSelector } from "../../hooks.ts";
 

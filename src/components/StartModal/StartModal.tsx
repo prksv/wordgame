@@ -51,7 +51,7 @@ function StartModal() {
                   alt="КГУ"
                 />
                 <Typography textAlign="right" color="black">
-                  <span style={{ fontWeight: "bold" }}>Работа выполнил:</span>
+                  <span style={{ fontWeight: "bold" }}>Работу выполнил:</span>
                   <br />
                   Просеков Егор - студент 1 курса ИТ-0900023Б
                 </Typography>

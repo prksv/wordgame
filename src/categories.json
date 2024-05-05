@@ -1,14 +1,14 @@
 [
   {
-    "id": "fruits",
-    "label": "Фрукты"
-  },
-  {
     "id": "russian_cities",
     "label": "Города России"
   },
   {
     "id": "animals",
     "label": "Животные"
+  },
+  {
+    "id": "fruits_and_vegetables",
+    "label": "Фрукты и овощи"
   }
 ]

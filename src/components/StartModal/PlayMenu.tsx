@@ -35,13 +35,7 @@ function PlayMenu() {
   };
 
   return (
-    <Stack
-      justifyContent="center"
-      alignItems="center"
-      maxWidth="500px"
-      flexGrow={1}
-      mb="40px"
-    >
+    <Stack justifyContent="center" alignItems="center" flexGrow={1} mb="40px">
       <Typography variant="h3" sx={{ mb: "20px" }} fontWeight="bold">
         Игра в слова
       </Typography>

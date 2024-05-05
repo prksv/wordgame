@@ -11,6 +11,7 @@ const style = {
   bgcolor: "background.default",
   color: "primary.main",
   py: "50px",
+  px: "20px",
 };
 
 function StartModal() {

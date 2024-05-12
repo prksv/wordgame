@@ -16,7 +16,10 @@ function Header() {
       direction="row"
       color="secondary.main"
       sx={{
-        background: "linear-gradient(to left, #2892e6, #82c1f2)"
+        background: "linear-gradient(to left, #2892e6, #82c1f2)",
+        position: "fixed",
+        width: "100%",
+        zIndex: 2
       }}
       justifyContent={{ sm: "center" }}
       alignItems="center"

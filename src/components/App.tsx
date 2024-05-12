@@ -35,7 +35,7 @@ function App() {
       <StartModal />
       <Header />
       <Container
-        sx={{ visibility: status === "started" ? "visible" : "hidden" }}
+        sx={{ visibility: status === "started" ? "visible" : "hidden", }}
       >
         <Stack alignItems="center">
           <Stack gap="15px" pb="40vh" sx={{ maxWidth: "100%" }} ref={ref}>

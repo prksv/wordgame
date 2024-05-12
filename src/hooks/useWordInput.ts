@@ -56,7 +56,6 @@ function useWordInput(
   }, [word, focusOn]);
 
   function handleChange(index: number, value: string) {
-    console.log(value);
     if (value == "") {
       return;
     }

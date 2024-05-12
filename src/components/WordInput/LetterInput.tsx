@@ -51,7 +51,7 @@ function LetterInput({
             textAlign: "center",
             padding: "5px 5px",
             fontSize: "30px",
-            color: "primary.main",
+            color: "text.primary",
             textTransform: "uppercase",
             fontWeight: "500",
           },

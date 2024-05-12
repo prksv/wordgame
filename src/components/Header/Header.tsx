@@ -14,8 +14,10 @@ function Header() {
   return (
     <Stack
       direction="row"
-      bgcolor="primary.light"
       color="secondary.main"
+      sx={{
+        background: "linear-gradient(to left, #2892e6, #82c1f2)"
+      }}
       justifyContent={{ sm: "center" }}
       alignItems="center"
       textAlign="center"

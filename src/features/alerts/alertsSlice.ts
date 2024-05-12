@@ -2,9 +2,10 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 
 type TAlertData = {
-  type: "success" | "error";
+  type: "success" | "error" | "info";
   message: string;
 };
+
 type TAlertState = {
   isOpen: boolean;
 };
@@ -20,7 +21,7 @@ export const createAlert = createAsyncThunk(
   (payload: TAlertData, { dispatch }) => {
     const id = uuidv4();
     dispatch(openAlert({ ...payload, id }));
-    setTimeout(() => dispatch(closeAlert(id)), 2000);
+    setTimeout(() => dispatch(closeAlert(id)), 3000);
   },
 );
 

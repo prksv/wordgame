@@ -8,23 +8,18 @@ import axios from "axios";
 import _ from "lodash";
 import { RootState } from "../../store.ts";
 import { TCategory } from "../../hooks/useGameword.ts";
+import { Category, GameState, TGameStatus, TInput } from "./gameSlice.types.ts";
+import Fuse from "fuse.js";
+import { createAlert } from "../alerts/alertsSlice.ts";
 
-export type Category = {
-  label: string;
-  id: string;
-};
-
-type TInput = {
-  isUserMove: boolean;
-  status?: TInputStatus;
-  value: string;
-};
-
-export type TInputStatus = "success" | "error";
-
-export type TSubmitError = {
-  inputId: number;
-  message: string;
+const initialState: GameState = {
+  inputs: [],
+  isHintsEnabled: false,
+  status: "waiting",
+  words: [],
+  usedWords: [],
+  winReason: "У соперника закончились слова",
+  loseReason: "Вы сдались",
 };
 
 const SKIP_LETTERS = ["ь", "ъ", "й", "ы"];
@@ -35,27 +30,6 @@ const formatWord = (word: string) => {
   return word.replace(regexp, "");
 };
 
-export type TGameStatus = "started" | "waiting" | "lose" | "win";
-
-export interface GameState {
-  category?: Category;
-  status: TGameStatus;
-  winReason: string;
-  loseReason: string;
-  inputs: TInput[];
-  words: string[];
-  usedWords: string[];
-}
-
-const initialState: GameState = {
-  inputs: [],
-  status: "waiting",
-  words: [],
-  usedWords: [],
-  winReason: "У соперника закончились слова",
-  loseReason: "Вы сдались",
-};
-
 export const loadWords = createAsyncThunk(
   "game/loadWords",
   async (categoryId: string) => {
@@ -63,7 +37,7 @@ export const loadWords = createAsyncThunk(
       responseEncoding: "utf-8",
     });
 
-    return data.split("\n");
+    return data.split("\n").map((word: string) => word.trim());
   },
 );
 
@@ -106,6 +80,8 @@ export const submitWord = createAsyncThunk(
   ) => {
     const { game } = getState() as RootState;
 
+    const { words, isHintsEnabled, usedWords } = game;
+
     if (inputId > 0) {
       const { value } = game.inputs[inputId - 1];
 
@@ -119,14 +95,22 @@ export const submitWord = createAsyncThunk(
       }
     }
 
-    if (!game.words.includes(word)) {
+    if (!words.includes(word)) {
+      if (isHintsEnabled) {
+        const found = await dispatch(checkSimilarWords(word)).unwrap();
+
+        if (found) {
+          return;
+        }
+      }
+
       return rejectWithValue({
         inputId,
         message: "Слово не подходит!",
       });
     }
 
-    if (game.usedWords.includes(word)) {
+    if (usedWords.includes(word)) {
       return rejectWithValue({
         inputId,
         message: "Слово уже использовалось!",
@@ -134,9 +118,39 @@ export const submitWord = createAsyncThunk(
     }
 
     dispatch(claimWord(word));
-
     dispatch(setInputSuccess(inputId));
     dispatch(makeBotMove(word));
+  },
+);
+
+export const checkSimilarWords = createAsyncThunk(
+  "game/findSimilarWords",
+  async (word: string, { dispatch, getState }) => {
+    const { game } = getState() as RootState;
+    const fuse = new Fuse(game.words, {
+      minMatchCharLength: 3,
+      includeScore: true,
+    });
+
+    const possibleWords = fuse.search(word, {
+      limit: 1,
+    });
+
+    if (possibleWords.length <= 0) {
+      return false;
+    }
+
+    if ((possibleWords[0].score ?? 0) <= 0.001) {
+      return false;
+    }
+
+    dispatch(
+      createAlert({
+        type: "info",
+        message: `Возможно, Вы имели ввиду слово "${possibleWords[0].item.toUpperCase()}"?`,
+      }),
+    );
+    return true;
   },
 );
 
@@ -149,7 +163,7 @@ export const makeBotMove = createAsyncThunk(
     const availableWords = previousWord
       ? selectAvailableWords(getState(), previousWord)
       : selectNotTakenWords(getState() as RootState);
-    console.log(availableWords);
+
     if (availableWords.length <= 0) {
       dispatch(setGameStatus("win"));
       return;
@@ -215,6 +229,10 @@ export const gameSlice = createSlice({
       state.status = payload;
     },
 
+    toggleHints: (state) => {
+      state.isHintsEnabled = !state.isHintsEnabled;
+    },
+
     startGame: (state, { payload }: PayloadAction<Category>) => {
       state.status = "started";
       state.category = payload;
@@ -262,6 +280,7 @@ export const {
   setInputSuccess,
   claimWord,
   setInputs,
+  toggleHints,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

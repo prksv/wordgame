@@ -12,11 +12,11 @@ import { useAppDispatch, useAppSelector } from "../../hooks.ts";
 import { closeMenu, closeRules } from "../../features/menu/menuSlice.ts";
 import { useState } from "react";
 import { TCategory } from "../../hooks/useGameword.ts";
-import { startGame } from "../../features/game/gameSlice.ts";
+import { startGame, toggleHints } from "../../features/game/gameSlice.ts";
 
 function PlayMenu() {
   const dispatch = useAppDispatch();
-  const { status } = useAppSelector((state) => state.game);
+  const { status, isHintsEnabled } = useAppSelector((state) => state.game);
   const [category, setCategory] = useState<TCategory | null>(null);
   const [isUserFirstMove, setUserFirstMove] = useState<boolean>(true);
 
@@ -36,10 +36,10 @@ function PlayMenu() {
 
   return (
     <Stack justifyContent="center" alignItems="center" flexGrow={1} mb="40px">
-      <Typography variant="h3" sx={{ mb: "20px" }} fontWeight="bold">
+      <Typography variant="h3" fontWeight="bold">
         Игра в слова
       </Typography>
-      <Stack sx={{ mb: "10px" }}>
+      <Stack sx={{ mb: "10px", mt: "20px" }}>
         <ButtonGroup sx={{ mb: "15px" }}>
           {status == "waiting" &&
             categories.map((gameCategory, key) => {
@@ -63,16 +63,30 @@ function PlayMenu() {
         >
           {status == "started" ? "Продолжить" : "Играть"}
         </Button>
-        <FormControlLabel
-          sx={{ alignSelf: "center" }}
-          control={
-            <Checkbox
-              checked={isUserFirstMove}
-              onChange={() => setUserFirstMove(!isUserFirstMove)}
+        <Stack direction="column" justifyContent="center" mt="10px">
+          <FormControlLabel
+            sx={{ alignSelf: "center" }}
+            label="Включить подсказки"
+            control={
+              <Checkbox
+                checked={isHintsEnabled}
+                onChange={() => dispatch(toggleHints())}
+              />
+            }
+          />
+          {status == "waiting" && (
+            <FormControlLabel
+              sx={{ alignSelf: "center" }}
+              control={
+                <Checkbox
+                  checked={isUserFirstMove}
+                  onChange={() => setUserFirstMove(!isUserFirstMove)}
+                />
+              }
+              label="Я хожу первым"
             />
-          }
-          label="Я хожу первым"
-        />
+          )}
+        </Stack>
       </Stack>
       <HowToPlayAccordion />
     </Stack>

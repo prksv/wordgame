@@ -1,4 +1,4 @@
-import { Box, Container, Fade, Modal, Stack, Typography } from "@mui/material";
+import {Box, Container, Fade, Modal, Stack, Theme, Typography} from "@mui/material";
 import { useAppSelector } from "../../hooks.ts";
 import kguLogo from "../../assets/logo.svg";
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ const style = {
   position: "absolute",
   width: "100%",
   height: "100%",
-  bgcolor: "background.default",
+  background: ({palette}: Theme) => palette?.background?.defaultGradient,
   color: "primary.main",
   py: "50px",
   px: "20px",
@@ -51,7 +51,7 @@ function StartModal() {
                   style={{ width: "200px", marginBottom: "20px" }}
                   alt="КГУ"
                 />
-                <Typography textAlign="right" color="black">
+                <Typography textAlign="right" color="text.primary">
                   <span style={{ fontWeight: "bold" }}>Работу выполнил:</span>
                   <br />
                   Просеков Егор - студент 1 курса ИТ-0900023Б

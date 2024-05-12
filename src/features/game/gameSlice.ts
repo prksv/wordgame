@@ -234,13 +234,6 @@ export const gameSlice = createSlice({
       state.isHintsEnabled = !state.isHintsEnabled;
     },
 
-    startGame: (state, { payload }: PayloadAction<Category>) => {
-      state.status = "started";
-      state.category = payload;
-      state.inputs = [];
-      state.inputs.push({ isUserMove: true, value: "" });
-    },
-
     setInputs: (state, { payload }: PayloadAction<TInput[]>) => {
       state.inputs = payload;
     },

@@ -127,7 +127,16 @@ export const checkSimilarWords = createAsyncThunk(
   "game/findSimilarWords",
   async (word: string, { dispatch, getState }) => {
     const { game } = getState() as RootState;
-    const fuse = new Fuse(game.words, {
+
+    let prevWord: string|undefined;
+
+    if (game.inputs.length >= 2) {
+        prevWord = game.inputs[game.inputs.length - 2].value;
+    }
+
+    const availableWords = selectAvailableWords(getState(), prevWord);
+
+    const fuse = new Fuse(availableWords, {
       minMatchCharLength: 3,
       includeScore: true,
     });
@@ -156,13 +165,11 @@ export const checkSimilarWords = createAsyncThunk(
 
 export const makeBotMove = createAsyncThunk(
   "game/botMove",
-  async (previousWord: string | null, { getState, dispatch }) => {
+  async (previousWord: string | undefined, { getState, dispatch }) => {
     const { game } = getState() as RootState;
     const words = [...game.words];
 
-    const availableWords = previousWord
-      ? selectAvailableWords(getState(), previousWord)
-      : selectNotTakenWords(getState() as RootState);
+    const availableWords = selectAvailableWords(getState(), previousWord);
 
     if (availableWords.length <= 0) {
       dispatch(setGameStatus("win"));
@@ -184,12 +191,6 @@ export const makeBotMove = createAsyncThunk(
     );
   },
 );
-
-const selectNotTakenWords = (state: RootState) => {
-  return state.game.words.filter(
-    (word) => !state.game.usedWords.includes(word),
-  );
-};
 
 export const selectAvailableWords = createSelector(
   [

@@ -65,7 +65,7 @@ export const startGame = createAsyncThunk(
         }),
       );
     } else {
-      dispatch(makeBotMove(null));
+      dispatch(makeBotMove());
     }
 
     dispatch(setGameStatus("started"));

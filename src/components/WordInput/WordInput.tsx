@@ -3,7 +3,7 @@ import useWordInput from "../../hooks/useWordInput.ts";
 import LetterInput from "./LetterInput.tsx";
 import { TransitionGroup } from "react-transition-group";
 import useGameword from "../../hooks/useGameword.ts";
-import { TInputStatus } from "../../features/game/gameSlice.ts";
+import {TInputStatus} from "../../features/game/gameSlice.types.ts";
 
 export interface WordInputInterface {
   minSlots?: number;

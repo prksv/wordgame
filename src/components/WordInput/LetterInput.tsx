@@ -1,7 +1,7 @@
 import { Box, InputBase } from "@mui/material";
 import { RefObject } from "react";
 import useWordInput from "../../hooks/useWordInput.ts";
-import { TInputStatus } from "../../features/game/gameSlice.ts";
+import {TInputStatus} from "../../features/game/gameSlice.types.ts";
 
 interface LetterInputProps {
   isUserMove: boolean;

@@ -22,7 +22,7 @@ function HowToPlayAccordion() {
       <Collapse in={isRulesOpen}>
         <Typography
           variant="subtitle1"
-          component="p"
+          component="div"
           maxWidth="700px"
           color="text.primary"
         >

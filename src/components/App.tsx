@@ -5,19 +5,24 @@ import StartModal from "./StartModal/StartModal.tsx";
 import useGameword from "../hooks/useGameword.ts";
 import { TransitionGroup } from "react-transition-group";
 import { useAppSelector } from "../hooks.ts";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import WinScreen from "./WinScreen/WinScreen.tsx";
 import LoseScreen from "./LoseScreen/LoseScreen.tsx";
 import SurrenderButton from "./SurrenderButton/SurrenderButton.tsx";
+import { min } from "lodash";
 
 function App() {
   const { onSubmit } = useGameword();
-  const { inputs, status } = useAppSelector((state) => state.game);
+  const { inputs, status, words } = useAppSelector((state) => state.game);
 
   const alerts = useAppSelector((state) => state.alerts);
 
   const ref = useRef<null | HTMLDivElement | any>();
 
+  const minSlots = useMemo(() => {
+    return min([min(words)?.length ?? 0, 4]);
+  }, [words]);
+    console.log(minSlots)
   useEffect(() => {
     setTimeout(() => {
       ref.current?.scrollIntoView({
@@ -35,7 +40,10 @@ function App() {
       <StartModal />
       <Header />
       <Container
-        sx={{ visibility: status === "started" ? "visible" : "hidden", pt: "110px"}}
+        sx={{
+          visibility: status === "started" ? "visible" : "hidden",
+          pt: "110px",
+        }}
       >
         <Stack alignItems="center">
           <Stack gap="15px" pb="40vh" sx={{ maxWidth: "100%" }} ref={ref}>
@@ -47,6 +55,7 @@ function App() {
                     status={status}
                     isUserMove={isUserMove}
                     key={key}
+                    minSlots={minSlots}
                     inputId={key}
                     value={value}
                     onSubmit={onSubmit}

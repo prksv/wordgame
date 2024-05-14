@@ -37,7 +37,7 @@ export const loadWords = createAsyncThunk(
       responseEncoding: "utf-8",
     });
 
-    return data.split("\n").map((word: string) => word.trim());
+    return data.trim().split("\n").map((word: string) => word.trim());
   },
 );
 

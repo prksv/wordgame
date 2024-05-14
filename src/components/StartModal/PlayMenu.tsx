@@ -63,9 +63,9 @@ function PlayMenu() {
         >
           {status == "started" ? "Продолжить" : "Играть"}
         </Button>
-        <Stack direction="column" justifyContent="center" mt="10px">
+        <Stack direction="column" justifyContent="center" alignItems="center" mt="10px">
           <FormControlLabel
-            sx={{ alignSelf: "center", color: "text.primary" }}
+            sx={{ color: "text.primary", mr: "0" }}
             label="Включить подсказки"
             control={
               <Checkbox
@@ -76,7 +76,7 @@ function PlayMenu() {
           />
           {status == "waiting" && (
             <FormControlLabel
-              sx={{ alignSelf: "center", color: "text.primary" }}
+              sx={{ color: "text.primary", mr: "0" }}
               control={
                 <Checkbox
                   checked={isUserFirstMove}

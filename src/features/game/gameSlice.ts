@@ -166,9 +166,6 @@ export const checkSimilarWords = createAsyncThunk(
 export const makeBotMove = createAsyncThunk(
   "game/botMove",
   async (previousWord: string | undefined, { getState, dispatch }) => {
-    const { game } = getState() as RootState;
-    const words = [...game.words];
-
     const availableWords = selectAvailableWords(getState(), previousWord);
 
     if (availableWords.length <= 0) {
@@ -177,8 +174,6 @@ export const makeBotMove = createAsyncThunk(
     }
 
     const takenWord = _.sample(availableWords)!;
-
-    words.splice(words.indexOf(takenWord), 1);
 
     dispatch(addInput({ isUserMove: false, value: takenWord }));
     dispatch(claimWord(takenWord));
@@ -195,17 +190,17 @@ export const makeBotMove = createAsyncThunk(
 export const selectAvailableWords = createSelector(
   [
     (state: RootState) => state.game,
-    (_, searchWord: string | undefined) => searchWord,
+    (_, previousWord: string | undefined) => previousWord,
   ],
-  (game, searchWord) => {
-    if (!searchWord) {
+  (game, previousWord) => {
+    if (!previousWord) {
       return game.words;
     }
 
     return game.words.filter(
       (word) =>
         !game.usedWords.includes(word) &&
-        formatWord(word)[0] == _.last(formatWord(searchWord)),
+        formatWord(word)[0] == _.last(formatWord(previousWord)),
     );
   },
 );

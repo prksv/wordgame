@@ -5,7 +5,7 @@ import {
   PayloadAction,
 } from "@reduxjs/toolkit";
 import axios from "axios";
-import _ from "lodash";
+import _, { max } from "lodash";
 import { RootState } from "../../store.ts";
 import { TCategory } from "../../hooks/useGameword.ts";
 import { Category, GameState, TGameStatus, TInput } from "./gameSlice.types.ts";
@@ -37,7 +37,10 @@ export const loadWords = createAsyncThunk(
       responseEncoding: "utf-8",
     });
 
-    return data.trim().split("\n").map((word: string) => word.trim());
+    return data
+      .trim()
+      .split("\n")
+      .map((word: string) => word.trim());
   },
 );
 
@@ -128,17 +131,18 @@ export const checkSimilarWords = createAsyncThunk(
   async (word: string, { dispatch, getState }) => {
     const { game } = getState() as RootState;
 
-    let prevWord: string|undefined;
+    let prevWord: string | undefined;
 
     if (game.inputs.length >= 2) {
-        prevWord = game.inputs[game.inputs.length - 2].value;
+      prevWord = game.inputs[game.inputs.length - 2].value;
     }
 
     const availableWords = selectAvailableWords(getState(), prevWord);
 
     const fuse = new Fuse(availableWords, {
-      minMatchCharLength: 3,
+      findAllMatches: false,
       includeScore: true,
+      threshold: 0.3,
     });
 
     const possibleWords = fuse.search(word, {

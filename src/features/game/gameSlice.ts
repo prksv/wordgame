@@ -142,7 +142,7 @@ export const checkSimilarWords = createAsyncThunk(
     const fuse = new Fuse<string>(availableWords, {
       findAllMatches: false,
       includeScore: true,
-      threshold: 0.3,
+      threshold: 0.4,
     });
 
     const possibleWords = fuse.search(word, {

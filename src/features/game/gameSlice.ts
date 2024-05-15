@@ -5,7 +5,7 @@ import {
   PayloadAction,
 } from "@reduxjs/toolkit";
 import axios from "axios";
-import _, { max } from "lodash";
+import _ from "lodash";
 import { RootState } from "../../store.ts";
 import { TCategory } from "../../hooks/useGameword.ts";
 import { Category, GameState, TGameStatus, TInput } from "./gameSlice.types.ts";

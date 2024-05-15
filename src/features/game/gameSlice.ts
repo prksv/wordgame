@@ -1,8 +1,8 @@
 import {
-  createAsyncThunk,
-  createSelector,
-  createSlice,
-  PayloadAction,
+    createAsyncThunk,
+    createSelector,
+    createSlice,
+    PayloadAction,
 } from "@reduxjs/toolkit";
 import axios from "axios";
 import _ from "lodash";
@@ -139,7 +139,7 @@ export const checkSimilarWords = createAsyncThunk(
 
     const availableWords = selectAvailableWords(getState(), prevWord);
 
-    const fuse = new Fuse(availableWords, {
+    const fuse = new Fuse<string>(availableWords, {
       findAllMatches: false,
       includeScore: true,
       threshold: 0.3,
@@ -202,16 +202,26 @@ export const selectAvailableWords = createSelector(
     }
 
     return game.words.filter(
-      (word) =>
+      (word: string) =>
         !game.usedWords.includes(word) &&
         formatWord(word)[0] == _.last(formatWord(previousWord)),
     );
   },
 );
 
+const getInitialState = (): GameState => {
+    const rawState = localStorage.getItem("game");
+
+    if (!rawState) {
+        return initialState;
+    }
+
+    return JSON.parse(rawState);
+}
+
 export const gameSlice = createSlice({
   name: "game",
-  initialState,
+  initialState: getInitialState(),
   reducers: {
     setCategory: (state, { payload }: PayloadAction<Category>) => {
       state.category = payload;
@@ -263,6 +273,8 @@ export const gameSlice = createSlice({
     });
   },
 });
+
+
 
 export const {
   setCategory,

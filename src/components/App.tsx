@@ -5,7 +5,7 @@ import StartModal from "./StartModal/StartModal.tsx";
 import useGameword from "../hooks/useGameword.ts";
 import { TransitionGroup } from "react-transition-group";
 import { useAppSelector } from "../hooks.ts";
-import { useEffect, useMemo, useRef } from "react";
+import {createRef, useEffect, useMemo} from "react";
 import WinScreen from "./WinScreen/WinScreen.tsx";
 import LoseScreen from "./LoseScreen/LoseScreen.tsx";
 import SurrenderButton from "./SurrenderButton/SurrenderButton.tsx";
@@ -17,12 +17,12 @@ function App() {
 
   const alerts = useAppSelector((state) => state.alerts);
 
-  const ref = useRef<null | HTMLDivElement | any>();
+  const ref = createRef<HTMLDivElement>();
 
   const minSlots = useMemo(() => {
     return min([min(words)?.length ?? 0, 4]);
   }, [words]);
-    console.log(minSlots)
+
   useEffect(() => {
     setTimeout(() => {
       ref.current?.scrollIntoView({
@@ -31,7 +31,7 @@ function App() {
         inline: "nearest",
       });
     }, 200);
-  }, [inputs.length]);
+  }, [inputs.length, ref]);
 
   return (
     <>

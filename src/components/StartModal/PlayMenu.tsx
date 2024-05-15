@@ -36,13 +36,13 @@ function PlayMenu() {
 
   return (
     <Stack justifyContent="center" alignItems="center" flexGrow={1} mb="40px">
-      <Typography variant="h3" fontWeight="bold">
+      <Typography variant="h3" fontWeight="bold" mb="10px">
         Игра в слова
       </Typography>
-      <Stack sx={{ mb: "10px", mt: "20px" }}>
-        <ButtonGroup sx={{ mb: "15px" }}>
-          {status == "waiting" &&
-            categories.map((gameCategory, key) => {
+      <Stack sx={{ mb: "10px" }}>
+        {status !== "started" && (
+          <ButtonGroup sx={{ mb: "15px", mt: "5px" }}>
+            {categories.map((gameCategory, key) => {
               return (
                 <Button
                   key={key}
@@ -55,7 +55,8 @@ function PlayMenu() {
                 </Button>
               );
             })}
-        </ButtonGroup>
+          </ButtonGroup>
+        )}
         <Button
           disabled={category === null && status == "waiting"}
           onClick={status == "started" ? resume : play}
@@ -63,7 +64,12 @@ function PlayMenu() {
         >
           {status == "started" ? "Продолжить" : "Играть"}
         </Button>
-        <Stack direction="column" justifyContent="center" alignItems="center" mt="10px">
+        <Stack
+          direction="column"
+          justifyContent="center"
+          alignItems="center"
+          mt="10px"
+        >
           <FormControlLabel
             sx={{ color: "text.primary", mr: "0" }}
             label="Включить подсказки"
@@ -74,7 +80,7 @@ function PlayMenu() {
               />
             }
           />
-          {status == "waiting" && (
+          {status !== "started" && (
             <FormControlLabel
               sx={{ color: "text.primary", mr: "0" }}
               control={
